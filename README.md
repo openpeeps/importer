@@ -1,20 +1,20 @@
 <p align="center">
   <img src="https://github.com/openpeeps/PKG/blob/main/.github/logo.png" width="90px"><br>
-  OpenPeeps repository template for developing libraries,<br>projects and other cool things. 👑 Written in Nim language
+  A generic file importer for building module systems. 👑 Written in Nim
 </p>
 
 <p align="center">
-  <code>nimble install {PKG}</code>
+  <code>nimble install importer</code>
 </p>
 
 <p align="center">
-  <a href="https://github.com/">API reference</a><br>
-  <img src="https://github.com/openpeeps/pistachio/workflows/test/badge.svg" alt="Github Actions">  <img src="https://github.com/openpeeps/pistachio/workflows/docs/badge.svg" alt="Github Actions">
+  <a href="https://github.com/openpeeps/importer">API reference</a><br>
+  <img src="https://github.com/openpeeps/importer/workflows/test/badge.svg" alt="Github Actions">  <img src="https://github.com/openpeeps/importer/workflows/docs/badge.svg" alt="Github Actions">
 </p>
 
 ## 😍 Key Features
 - [x] Open Source | `MIT` License
-- [x] Written in Nim language
+- [x] Written in Nim 👑 
 
 ## Examples
 ...
@@ -26,5 +26,5 @@
 - 🥰 [Donate via PayPal address](https://www.paypal.com/donate/?hosted_button_id=RJK3ZTDWPL55C)
 
 ### 🎩 License
-{PKG} | MIT license. [Made by Humans from OpenPeeps](https://github.com/openpeeps).<br>
+Importer | MIT license. [Made by Humans from OpenPeeps](https://github.com/openpeeps).<br>
 Copyright &copy; 2023 OpenPeeps & Contributors &mdash; All rights reserved.
