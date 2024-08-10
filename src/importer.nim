@@ -12,6 +12,8 @@ import std/[os, uri, strutils, sequtils, tables, httpclient]
 
 export malebolgia, lockers, ticketlocks
 
+import ./importer/resolver
+
 type
   ImportFile* = ref object
     path, source*: string
@@ -53,6 +55,7 @@ type
     mainFilePath, mainDirPath, mainId: string
     fails: seq[FailedImportTuple]
       # a seq of failed imports containing the file path and `ImportErrorMessage` 
+    resolver: Resolver
 
   ImportHandle*[T] = proc(imp: Import[T], file: ImportFile, ticket: ptr TicketLock): seq[string] {.gcsafe, nimcall.}
   ImportError* = object of CatchableError
@@ -84,7 +87,7 @@ proc error[T](i: Import[T], reason: ImportErrorMessage, fpath: string) =
   # Used to mark failed imports in spawned tasks
   add i.fails, (reason, fpath)
 
-proc resolver[T](i: Locker[Import[T]], m: MasterHandle, fpath: string,
+proc importHandle[T](i: Locker[Import[T]], m: MasterHandle, fpath: string,
       parseHandle: ptr ImportHandle[T], ticket: ptr TicketLock) {.gcsafe.} =
   proc resolve(fpath: string, imp: Import[T]) =
     var fpath = fpath
@@ -97,14 +100,14 @@ proc resolver[T](i: Locker[Import[T]], m: MasterHandle, fpath: string,
           var importFile = ImportFile(path: fpath, source: readFile(fpath))
           let fpaths: seq[string] = parseHandle[](imp, importFile, ticket)
           imp.resolved[fpath] = importFile
-          importFile.deps = importFile.deps.concat(fpaths)
+          # importFile.deps = importFile.deps.concat(fpaths)
           for f in fpaths:
             resolve(f, imp)
-        else:
-          if fpath in imp.resolved[fpath].deps:
-            imp.error(importCircularError, fpath)
-      else: imp.error(importCircularError, fpath)
-    else: imp.error(importNotFound, fpath)
+        # else:
+        #   if fpath in imp.resolved[fpath].deps:
+        #     imp.error(importCircularError, fpath)
+      # else: imp.error(importCircularError, fpath)
+    # else: imp.error(importNotFound, fpath)
   lock i as imp:
     resolve(fpath, imp)
 
@@ -113,15 +116,16 @@ proc imports*[T](imp: Import[T], files: seq[string], parseHandle: ImportHandle[T
   var ticket = initTicketLock()
   imp.master.awaitAll:
     for fpath in files:
-      imp.master.spawn resolver(
+      imp.master.spawn importHandle(
         isolateImp, imp.master.getHandle,
         fpath, addr(parseHandle), addr(ticket)
       )
 
-# proc isCached*(f: ImportFile): bool = f.cached
-proc getImportPath*(f: ImportFile): string = f.path
+proc getImportPath*(f: ImportFile): string =
+  f.path
 
-proc hasFailedImports*[T](imp: Import[T]): bool = imp.fails.len != 0
+proc hasFailedImports*[T](imp: Import[T]): bool =
+  imp.fails.len != 0
 
 iterator importErrors*[T](imp: Import[T]): FailedImportTuple =
   for err in imp.fails:
